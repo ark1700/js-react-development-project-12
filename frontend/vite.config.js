@@ -7,7 +7,7 @@ export default defineConfig({
     port: 5002,
     proxy: {
       // Проксируем запросы к API
-      '/api': {
+      '/api/v1': {
         target: 'http://localhost:5003',
       },
       // Проксируем WebSocket соединения

@@ -3,8 +3,8 @@ import React from 'react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { Button, Form as BootstrapForm, Alert } from 'react-bootstrap';
-// import { useDispatch } from 'react-redux';
-// import { login } from './authSlice';
+import { useLoginMutation } from './authApi';
+import { useNavigate } from 'react-router-dom';
 
 const LoginSchema = Yup.object().shape({
   username: Yup.string().required('Имя пользователя обязательно'),
@@ -12,19 +12,21 @@ const LoginSchema = Yup.object().shape({
 });
 
 const LoginForm = () => {
-  // const dispatch = useDispatch();
-
+  const navigate = useNavigate();
+  const [login, { isLoading }] = useLoginMutation();
   const handleSubmit = async (values, { setSubmitting, setStatus }) => {
     try {
-      // dispatch(login({ user: { username: values.username }, token: 'mock-token' }));
-      console.log('values', values);
+      const response = await login(values).unwrap();
+      const { token } = response;
+
+      localStorage.setItem('token', token);
+      navigate('/');
     } catch (err) {
-      setStatus('Ошибка входа. Проверьте данные.');
-    } finally {
-      setSubmitting(false);
+      console.log(err);
+      setStatus('Неверный логин или пароль');
     }
   };
-
+  // todo: add loader
   return (
     <Formik
       initialValues={{ username: '', password: '' }}
