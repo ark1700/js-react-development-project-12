@@ -27,6 +27,8 @@ const LoginForm = () => {
     }
   };
   // todo: add loader
+  // todo: add login/error notifications
+  // todo: update login form styles
   return (
     <Formik
       initialValues={{ username: '', password: '' }}
