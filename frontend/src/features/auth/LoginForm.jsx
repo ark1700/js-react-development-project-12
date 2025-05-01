@@ -17,9 +17,10 @@ const LoginForm = () => {
   const handleSubmit = async (values, { setSubmitting, setStatus }) => {
     try {
       const response = await login(values).unwrap();
-      const { token } = response;
+      const { token, username } = response;
 
       localStorage.setItem('token', token);
+      localStorage.setItem('username', username);
       navigate('/');
     } catch (err) {
       console.log(err);

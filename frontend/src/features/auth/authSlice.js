@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { authApi } from './authApi';
 
 const initialState = {
-  user: null,
+  username: localStorage.getItem('username') || null,
   token: localStorage.getItem('token') || null,
 };
 
@@ -11,12 +11,12 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setCredentials: (state, action) => {
-      state.user = action.payload.user;
+      state.username = action.payload.username;
       state.token = action.payload.token;
     },
     logout: (state) => {
       localStorage.removeItem('token');
-      state.user = null;
+      state.username = null;
       state.token = null;
     },
   },
@@ -25,7 +25,7 @@ const authSlice = createSlice({
       authApi.endpoints.login.matchFulfilled,
       (state, { payload }) => {
         state.token = payload.token
-        state.user = payload.user
+        state.username = payload.username
       },
     )
   },
