@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useGetMessagesQuery } from '../features/messages/messageApi';
 import { useGetChannelsQuery } from '../features/channels/channelApi';
 import { ChannelsSideBar } from '@/features/channels/ChannelsSideBar';
 import { ChannelHeader } from '@/features/channels/ChannelHeader';
 import { MessagesList } from '@/features/messages/MessagesList';
 import { MessageInput } from '@/features/messages/MessageInput';
+import { SocketProvider } from '@/services/SocketContext';
 
 const ChatPage = () => {
   const { isLoading: isChannelsLoading } = useGetMessagesQuery();
@@ -14,14 +15,16 @@ const ChatPage = () => {
     return <div>Loading...</div>;
   }
   return (
-    <div className="flex h-screen bg-background">
-      <ChannelsSideBar />
-      <div className="flex-1 flex flex-col">
-        <ChannelHeader />
-        <MessagesList />
-        <MessageInput />
+    <SocketProvider>
+      <div className="flex h-screen bg-background">
+        <ChannelsSideBar />
+        <div className="flex-1 flex flex-col">
+          <ChannelHeader />
+          <MessagesList />
+          <MessageInput />
+        </div>
       </div>
-    </div>
+    </SocketProvider>
   )
 };
 

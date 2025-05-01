@@ -1,14 +1,30 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send } from "lucide-react";
+import { Loader2, Send } from "lucide-react";
+import { useSendMessageMutation } from "./messageApi";
+import { useSelector } from "react-redux";
+import { selectActiveChannel } from "../channels/channelSlice";
 
 export const MessageInput = () => {
   const [newMessage, setNewMessage] = useState("");
-  const handleSendMessage = () => {
-    // Logic to send the message
+  const [sendMessage, { isLoading }] = useSendMessageMutation();
+  const activeChannel = useSelector(selectActiveChannel);
+  const username = useSelector((state) => state.auth.username);
+
+  const handleSendMessage = async () => {
     console.log("Message sent:", newMessage);
-    setNewMessage("");
+    try {
+      await sendMessage({
+        channelId: activeChannel.id,
+        body: newMessage,
+        username,
+      });
+
+      setNewMessage("");
+    } catch (error) {
+      console.error('Ошибка отправки сообщения:', error);
+    }
   };
 
   return (
@@ -25,8 +41,12 @@ export const MessageInput = () => {
         }}
         className="flex-1 mr-2"
       />
-      <Button onClick={handleSendMessage}>
-        <Send className="h-4 w-4" />
+      <Button onClick={handleSendMessage} disabled={!newMessage || isLoading}>
+        {isLoading ? (
+          <Loader2 className="animate-spin" />
+        ) : (
+          <Send className="w-5 h-5" />
+        )}
       </Button>
     </div>
   );

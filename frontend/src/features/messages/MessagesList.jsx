@@ -14,50 +14,54 @@ import {
 } from "@/components/ui/dialog"
 import { messagesSelectors } from "./messageSlice"
 import { useSelector } from "react-redux"
+import { selectActiveChannel } from "../channels/channelSlice"
+import { useDeleteMessageMutation, useUpdateMessageMutation } from "./messageApi"
 
 export const MessagesList = () => {
   const messages = useSelector(messagesSelectors.selectAll);
-  const [selectedChannel, setSelectedChannel] = useState(1);
   const [editMessageContent, setEditMessageContent] = useState("");
   const [editMessageId, setEditMessageId] = useState(null);
+  const currentChannel = useSelector(selectActiveChannel);
+  const [deleteMessage] = useDeleteMessageMutation();
+  const [updateMessage] = useUpdateMessageMutation();
 
   // Handle editing a message
   const handleEditMessage = () => {
     if (editMessageContent.trim() === "" || editMessageId === null) return;
-
-    setMessages({
-      ...messages,
-      [selectedChannel]: messages[selectedChannel].map((message) =>
-        message.id === editMessageId ? { ...message, content: editMessageContent } : message,
-      ),
+    updateMessage({
+      messageId:editMessageId,
+      message: {
+        body: editMessageContent,
+      },
     });
-
     setEditMessageId(null);
     setEditMessageContent("");
   };
 
   // Handle deleting a message
   const handleDeleteMessage = (messageId) => {
-    setMessages({
-      ...messages,
-      [selectedChannel]: messages[selectedChannel].filter((message) => message.id !== messageId),
-    });
+    deleteMessage(messageId);
   };
-
+  // todo: refactor form
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
-      {selectedChannel &&
-        messages[selectedChannel]?.map((message) => (
+      {currentChannel &&
+        messages?.filter((message) => message.channelId === currentChannel.id)?.map((message) => (
           <div key={message.id} className="flex group">
             <Avatar className="h-10 w-10 mr-3 mt-0.5">
-              <AvatarFallback>{message.avatar}</AvatarFallback>
+              <AvatarFallback>{message.username[0].toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="flex-1">
               <div className="flex items-center">
-                <span className="font-semibold">{message.user}</span>
-                <span className="text-xs text-muted-foreground ml-2">{message.time}</span>
+                <span className="font-semibold">{message.username}</span>
+                {!!message.time && (
+                  <span className="text-xs text-muted-foreground ml-2">{message.time}</span>
+                )}
                 <div className="ml-auto opacity-0 group-hover:opacity-100 flex">
-                  <Dialog>
+                  <Dialog onOpenChange={() => {
+                    setEditMessageId(message.id);
+                    setEditMessageContent(message.body);
+                  }}>
                     <DialogTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-8 w-8">
                         <Edit2 className="h-4 w-4" />
@@ -70,12 +74,8 @@ export const MessagesList = () => {
                       <div className="py-4">
                         <Input
                           placeholder="Текст сообщения"
-                          value={editMessageId === message.id ? editMessageContent : message.content}
+                          value={editMessageContent}
                           onChange={(e) => setEditMessageContent(e.target.value)}
-                          onFocus={() => {
-                            setEditMessageId(message.id);
-                            setEditMessageContent(message.content);
-                          }}
                         />
                       </div>
                       <DialogFooter>
@@ -98,7 +98,7 @@ export const MessagesList = () => {
                   </Button>
                 </div>
               </div>
-              <p className="mt-1">{message.content}</p>
+              <p className="mt-1">{message.body}</p>
             </div>
           </div>
         ))}
