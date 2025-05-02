@@ -1,3 +1,4 @@
+import { channelsActions } from '@/features/channels/channelSlice';
 import { messagesActions } from '@/features/messages/messageSlice';
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -11,6 +12,7 @@ export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const dispatch = useDispatch();
   const { addMessage, updateMessage, removeMessage } = messagesActions;
+  const { addChannel, updateChannel, removeChannel } = channelsActions;
 
   useEffect(() => {
     const newSocket = io();
@@ -41,6 +43,23 @@ export const SocketProvider = ({ children }) => {
     newSocket.on("removeMessage", (message) => {
       console.log("Message removed:", message);
       dispatch(removeMessage(message.id));
+    });
+
+    // channels events
+    newSocket.on("newChannel", (channel) => {
+      console.log("New channel received:", channel);
+      dispatch(addChannel(channel));
+    });
+    newSocket.on("renameChannel", (channel) => {
+      console.log("Channel renamed:", channel);
+      dispatch(updateChannel({
+        id: channel.id,
+        changes: { name: channel.name },
+      }));
+    });
+    newSocket.on("removeChannel", (channel) => {
+      console.log("Channel removed:", channel);
+      dispatch(removeChannel(channel.id));
     });
 
     return () => {

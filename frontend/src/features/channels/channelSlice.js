@@ -19,18 +19,7 @@ export const channelsSlice = createSlice({
         state.activeChannelId = action.payload[0].id; // автоматически выбрать первый канал
       }
     },
-    removeChannel: (state, action) => {
-      const idToRemove = action.payload;
-
-      channelsAdapter.removeOne(state, idToRemove);
-
-      if (state.activeChannelId === idToRemove) {
-        const remainingIds = state.ids;
-
-        state.activeChannelId = remainingIds.length > 0 ? remainingIds[0] : null;
-        // если остались каналы — выбрать первый, иначе null
-      }
-    },
+    removeChannel: channelsAdapter.removeOne,
     updateChannel: channelsAdapter.updateOne,
     setActiveChannel: (state, action) => {
       state.activeChannelId = action.payload;
@@ -57,21 +46,16 @@ export const channelsSlice = createSlice({
       .addMatcher(
         channelApi.endpoints.deleteChannel.matchFulfilled,
         (state, { payload }) => {
-          const idToRemove = payload;
-          channelsAdapter.removeOne(state, idToRemove);
-
-          if (state.activeChannelId === idToRemove) {
-            const remainingIds = state.ids;
-
-            state.activeChannelId = remainingIds.length > 0 ? remainingIds[0] : null;
-            // если остались каналы — выбрать первый, иначе null
-          }
+          channelsAdapter.removeOne(state, payload.id);
         },
       )
       .addMatcher(
         channelApi.endpoints.updateChannel.matchFulfilled,
         (state, { payload }) => {
-          channelsAdapter.updateOne(state, payload);
+          channelsAdapter.updateOne(state, {
+            id: payload.id,
+            changes: { name: payload.name },
+          });
         },
       )
   },
@@ -81,5 +65,5 @@ export const selectActiveChannel = (state) => {
   return activeChannelId ? state.channels.entities[activeChannelId] : null;
 };
 export const channelsSelectors = channelsAdapter.getSelectors((state) => state.channels);
-export const channelsSelectorsActions = channelsSlice.actions;
+export const channelsActions = channelsSlice.actions;
 export default channelsSlice.reducer;
