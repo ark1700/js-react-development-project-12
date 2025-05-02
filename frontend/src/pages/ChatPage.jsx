@@ -6,14 +6,16 @@ import { ChannelHeader } from '@/features/channels/ChannelHeader';
 import { MessagesList } from '@/features/messages/MessagesList';
 import { MessageInput } from '@/features/messages/MessageInput';
 import { SocketProvider } from '@/services/SocketContext';
+import { LoadingOverlay } from '@/components/LoadingOverlay';
 
 const ChatPage = () => {
   const { isLoading: isChannelsLoading } = useGetMessagesQuery();
   const { isLoading: isMessegesLoading } = useGetChannelsQuery();
 
-  if (isChannelsLoading || isMessegesLoading) {
-    return <div>Loading...</div>;
-  }
+  // if (!isChannelsLoading || isMessegesLoading) {
+  //   return <LoadingOverlay isLoading={isLoading} />;
+  // }
+
   return (
     <SocketProvider>
       <div className="flex h-screen bg-background">
@@ -24,6 +26,7 @@ const ChatPage = () => {
           <MessageInput />
         </div>
       </div>
+      <LoadingOverlay isLoading={isChannelsLoading || isMessegesLoading} />
     </SocketProvider>
   )
 };
