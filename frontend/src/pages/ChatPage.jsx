@@ -7,6 +7,7 @@ import { MessagesList } from '@/features/messages/MessagesList';
 import { MessageInput } from '@/features/messages/MessageInput';
 import { SocketProvider } from '@/services/SocketContext';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
+import { UserProfile } from '@/features/auth/UserProfile';
 
 const ChatPage = () => {
   const { isLoading: isChannelsLoading } = useGetMessagesQuery();
@@ -19,7 +20,10 @@ const ChatPage = () => {
   return (
     <SocketProvider>
       <div className="flex h-screen bg-background">
-        <ChannelsSideBar />
+        <div className="w-64 border-r flex flex-col dark:border-gray-700">
+          <ChannelsSideBar />
+          <UserProfile />
+        </div>
         <div className="flex-1 flex flex-col">
           <ChannelHeader />
           <MessagesList />
